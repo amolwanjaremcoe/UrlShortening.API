@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UrlShortening.Model\UrlShortening.Model.csproj" />
+    <ProjectReference Include="..\UrlShortening.Service\UrlShortening.Service.csproj" />
+  </ItemGroup>
+
+
+</Project>
