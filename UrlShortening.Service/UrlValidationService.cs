@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using UrlShortening.DataAccess;
 
 namespace UrlShortening.Service
 {
     public class UrlValidationService : IUrlValidationService
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IUrlDataRepository _urlDataRepository;
 
-        public UrlValidationService(IHttpClientFactory httpClientFactory)
+        public UrlValidationService(IHttpClientFactory httpClientFactory, IUrlDataRepository urlDataRepository)
         {
             _httpClientFactory = httpClientFactory;
+            _urlDataRepository = urlDataRepository;
         }
 
         public async Task<bool> IsUrlValid(string url)

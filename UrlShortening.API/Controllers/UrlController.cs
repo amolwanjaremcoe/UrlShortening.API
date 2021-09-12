@@ -14,12 +14,9 @@ namespace UrlShortening.API.Controllers
     {
         private readonly IUrlValidationService _urlValidationService;
 
-        private readonly MongoDBConfig _mongoDBConfig;
-
-        public UrlController(IUrlValidationService urlValidationService, IConfiguration configuration)
+        public UrlController(IUrlValidationService urlValidationService)
         {
             _urlValidationService = urlValidationService;
-            _mongoDBConfig = configuration.GetSection("MongoDBConfig").Get<MongoDBConfig>();
         }
 
         // GET: UrlController
