@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UrlShortening.DataAccess;
 using UrlShortening.Model;
+using UrlShortening.Model.Exception;
 
 namespace UrlShortening.Service
 {
@@ -66,7 +67,7 @@ namespace UrlShortening.Service
                 {
                     attempts++;
                     if (attempts >= _codeGenerationMaxAttempts)
-                        throw new Exception("Short key generation failed");
+                        throw new KeyGenerationFailedException();
                 }
                 else
                 {
