@@ -1,5 +1,7 @@
-﻿using MongoDB.Bson;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,9 +13,12 @@ namespace UrlShortening.DataAccess
     public class UrlDataRepository : IUrlDataRepository
     {
         private readonly IUrlDataContext _context;
-        public UrlDataRepository(IUrlDataContext context)
+        private readonly IDistributedCache _cache;
+
+        public UrlDataRepository(IUrlDataContext context, IDistributedCache cache)
         {
             _context = context;
+            _cache = cache;
         }
 
         // api/[GET]
@@ -27,12 +32,14 @@ namespace UrlShortening.DataAccess
 
         public async Task CreateAsync(UrlData urlData)
         {
-            urlData.CreationDate = DateTime.UtcNow;
+            urlData.CreationDate = DateTime.UtcNow;           
             await _context.UrlDatas.InsertOneAsync(urlData);
         }
 
         public async Task<bool> DeleteAsync(string shortCode)
         {
+            await _cache.RemoveAsync(shortCode);
+
             FilterDefinition<UrlData> filter = Builders<UrlData>.Filter.Eq(m => m.ShortCode, shortCode);
             DeleteResult deleteResult = await _context
                                                 .UrlDatas
@@ -40,13 +47,38 @@ namespace UrlShortening.DataAccess
             return deleteResult.IsAcknowledged
                 && deleteResult.DeletedCount > 0;
         }
+
+        /// <summary>
+        /// Check if value is present in the cache if yes then return
+        /// Else 
+        /// </summary>
+        /// <param name="shortCode"></param>
+        /// <returns></returns>
         public async Task<UrlData> GetUrlDataAsync(string shortCode)
         {
-            FilterDefinition<UrlData> filter = Builders<UrlData>.Filter.Eq(m => m.ShortCode, shortCode);
-            return await _context
-                    .UrlDatas
-                    .Find(filter)
-                    .FirstOrDefaultAsync();
+            var urlByteData = await _cache.GetAsync(shortCode);
+            if (urlByteData != null)
+            {
+                var jsonData = Encoding.ASCII.GetString(urlByteData);
+                return JsonConvert.DeserializeObject<UrlData>(jsonData);                
+            }
+            else
+            {
+                FilterDefinition<UrlData> filter = Builders<UrlData>.Filter.Eq(m => m.ShortCode, shortCode);
+                var urlData = await _context
+                        .UrlDatas
+                        .Find(filter)
+                        .FirstOrDefaultAsync();
+
+                if (urlData != null)
+                {
+                    //Save in the cache
+                    var jsonString = JsonConvert.SerializeObject(urlData);
+                    var byteData = Encoding.ASCII.GetBytes(jsonString);
+                    await _cache.SetAsync(urlData.ShortCode, byteData);
+                }
+                return urlData;
+            }
         }
     }
 }

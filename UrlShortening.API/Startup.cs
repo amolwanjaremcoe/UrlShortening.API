@@ -1,18 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using UrlShortening.DataAccess;
 using UrlShortening.Model;
 using UrlShortening.Service;
+using UrlShortening.Service.Implementation;
 
 namespace UrlShortening.API
 {
@@ -36,6 +31,15 @@ namespace UrlShortening.API
             services.AddTransient<IUrlDataContext, UrlDataContext>();
             services.AddTransient<IUrlDataManager, UrlDataManager>();
             services.AddTransient<IShortCodeGeneratorService, ShortCodeGeneratorService>();
+            services.AddStackExchangeRedisCache(o =>
+            {
+                o.Configuration = Configuration.GetValue<string>("Redis:Configuration");
+                o.InstanceName = Configuration.GetValue<string>("Redis:InstanceName");
+            });
+
+            var serviceProvider = services.BuildServiceProvider();
+            var logger = serviceProvider.GetService<ILogger<Startup>>();
+            services.AddSingleton(typeof(ILogger), logger);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

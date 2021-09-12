@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 using UrlShortening.DataAccess;
 using UrlShortening.Model;
 using UrlShortening.Model.Exception;
 
-namespace UrlShortening.Service
+namespace UrlShortening.Service.Implementation
 {
     public class UrlDataManager : IUrlDataManager
     {
@@ -14,14 +14,18 @@ namespace UrlShortening.Service
         private readonly IShortCodeGeneratorService _shortCodeGeneratorService;
         private readonly int _codeGenerationMaxAttempts = 5;
         private readonly int _defaultExpirationYear = 5;
-        public UrlDataManager(IUrlDataRepository urlDataRepository, IShortCodeGeneratorService shortCodeGeneratorService)
+        private readonly ILogger _logger;        
+
+        public UrlDataManager(IUrlDataRepository urlDataRepository, IShortCodeGeneratorService shortCodeGeneratorService, ILogger logger)
         {
             _urlDataRepository = urlDataRepository;
             _shortCodeGeneratorService = shortCodeGeneratorService;
+            _logger = logger;            
         }
 
         public async Task<string> GetUrlAsync(string shortCode)
         {
+            _logger.LogDebug($"Get URL with code - {shortCode}");
             var urlData = await _urlDataRepository.GetUrlDataAsync(shortCode);
             if (urlData != null)
             {
@@ -31,8 +35,13 @@ namespace UrlShortening.Service
                 }
                 else
                 {
+                    _logger.LogInformation($"Deleting expired short URL with code - {shortCode}");
                     await _urlDataRepository.DeleteAsync(shortCode);
                 }
+            }
+            else
+            {
+                _logger.LogInformation($"Short URL with code {shortCode} not found");
             }
             return string.Empty;
         }
@@ -47,6 +56,7 @@ namespace UrlShortening.Service
         /// <returns></returns>
         public async Task<string> GenerateShortUrlCode(string originalUrl)
         {
+            _logger.LogDebug($"Generating Short code for URL - {originalUrl}");
             var shortCode = await GenerateUniqueShortCode(originalUrl);
             await _urlDataRepository.CreateAsync(new UrlData
             {
@@ -54,15 +64,24 @@ namespace UrlShortening.Service
                 OriginalUrl = originalUrl,
                 ShortCode = shortCode
             });
+            _logger.LogDebug($"Generated Short code {shortCode} for URL - {originalUrl}");
             return shortCode;
         }
 
+        /// <summary>
+        /// Function to generate Unique short code for the URL
+        /// It will call the Code generation service to generate a short code
+        /// If the short code value is already used, it will re attempt to generate the code for up to the value of codeGenerationMaxAttempts
+        /// </summary>
+        /// <param name="originalUrl"></param>
+        /// <returns></returns>
         private async Task<string> GenerateUniqueShortCode(string originalUrl)
         {
             int attempts = 0;
             while (true)
             {
-                var shortCode = await _shortCodeGeneratorService.GenerateShortCode(originalUrl);
+                _logger.LogDebug($"Attemp #{attempts+1} to generate short code for URL - {originalUrl}");
+                var shortCode = _shortCodeGeneratorService.GenerateShortCode(originalUrl);
                 if (await _urlDataRepository.GetUrlDataAsync(shortCode) != null)
                 {
                     attempts++;
@@ -71,6 +90,7 @@ namespace UrlShortening.Service
                 }
                 else
                 {
+                    _logger.LogDebug($"Generated short code {shortCode} in Attemp #{attempts} for URL - {originalUrl}");
                     return shortCode;
                 }
             }

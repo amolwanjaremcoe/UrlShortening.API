@@ -14,6 +14,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EE8CA8C3-7A54-43B2-9B1D-CB86BEEC628C}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		docker-compose.yml = docker-compose.yml
 		ReadMe.txt = ReadMe.txt
 	EndProjectSection
 EndProject

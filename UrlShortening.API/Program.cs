@@ -19,12 +19,10 @@ namespace UrlShortening.API
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-             .ConfigureAppConfiguration((hostingContext, builder) =>
+             .ConfigureLogging(logging =>
              {
-                 builder.AddEnvironmentVariables()
-                        .SetBasePath(Directory.GetParent(AppContext.BaseDirectory).FullName)
-                        .AddJsonFile($"appsettings.json")
-                         .AddEnvironmentVariables();
+                 logging.ClearProviders();
+                 logging.AddConsole();
              })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

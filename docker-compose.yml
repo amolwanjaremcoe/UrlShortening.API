@@ -1,0 +1,41 @@
+# If you're looking to run all the services, run:
+# docker-compose up
+
+version: '3.7'
+
+services:
+
+  urldata-db:
+    image: mongo
+    environment:
+      MONGO_INITDB_DATABASE: UrlData
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:6-alpine
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8011:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=urldata-db
+    depends_on:
+      - urldata-db
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=redis
+    ports:
+      - "8013:8081"
+    depends_on:
+      - redis
