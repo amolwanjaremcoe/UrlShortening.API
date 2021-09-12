@@ -38,7 +38,7 @@ namespace UrlShortening.API.Controllers
         }
 
         [HttpPost("short")]
-        public async Task<string> CreateUrl([FromBody] UrlViewModel urlViewModel)
+        public async Task<string> CreateShortUrl([FromBody] UrlViewModel urlViewModel)
         {
             if (urlViewModel != null && await _urlValidationService.IsUrlValid(urlViewModel.OriginalUrl))
             {

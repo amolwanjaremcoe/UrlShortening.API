@@ -7,6 +7,6 @@ namespace UrlShortening.Service
 {
     public interface IShortCodeGeneratorService
     {
-        public Task<string> GenerateShortCode();
+        public Task<string> GenerateShortCode(string url);
     }
 }

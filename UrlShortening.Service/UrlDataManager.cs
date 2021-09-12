@@ -46,7 +46,7 @@ namespace UrlShortening.Service
         /// <returns></returns>
         public async Task<string> GenerateShortUrlCode(string originalUrl)
         {
-            var shortCode = await GenerateUniqueShortCode();
+            var shortCode = await GenerateUniqueShortCode(originalUrl);
             await _urlDataRepository.CreateAsync(new UrlData
             {
                 ExpirationDate = DateTime.UtcNow.AddYears(_defaultExpirationYear),
@@ -56,13 +56,13 @@ namespace UrlShortening.Service
             return shortCode;
         }
 
-        private async Task<string> GenerateUniqueShortCode()
+        private async Task<string> GenerateUniqueShortCode(string originalUrl)
         {
             int attempts = 0;
             while (true)
             {
-                var shortCode = await _shortCodeGeneratorService.GenerateShortCode();
-                if (_urlDataRepository.GetUrlDataAsync(shortCode) != null)
+                var shortCode = await _shortCodeGeneratorService.GenerateShortCode(originalUrl);
+                if (await _urlDataRepository.GetUrlDataAsync(shortCode) != null)
                 {
                     attempts++;
                     if (attempts >= _codeGenerationMaxAttempts)

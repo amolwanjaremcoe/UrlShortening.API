@@ -35,6 +35,7 @@ namespace UrlShortening.API
             services.AddTransient<IUrlDataRepository, UrlDataRepository>();
             services.AddTransient<IUrlDataContext, UrlDataContext>();
             services.AddTransient<IUrlDataManager, UrlDataManager>();
+            services.AddTransient<IShortCodeGeneratorService, ShortCodeGeneratorService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
