@@ -27,6 +27,7 @@ namespace UrlShortening.DataAccess
 
         public async Task CreateAsync(UrlData urlData)
         {
+            urlData.CreationDate = DateTime.UtcNow;
             await _context.UrlDatas.InsertOneAsync(urlData);
         }
 

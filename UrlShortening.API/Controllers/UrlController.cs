@@ -9,34 +9,41 @@ using UrlShortening.Service;
 
 namespace UrlShortening.API.Controllers
 {
-    [Route("[controller]")]
+   // [Route("[controller]")]
     public class UrlController : Controller
     {
         private readonly IUrlValidationService _urlValidationService;
 
-        public UrlController(IUrlValidationService urlValidationService)
+        private readonly IUrlDataManager _urlDataManager;
+
+        public UrlController(IUrlValidationService urlValidationService, IUrlDataManager urlDataManager)
         {
             _urlValidationService = urlValidationService;
+            _urlDataManager = urlDataManager;
         }
 
         // GET: UrlController
-        [HttpGet("{key}")]
-        public ActionResult Index(string key)
+        [HttpGet("{shortCode}")]
+        public async Task<ActionResult> Index(string shortCode)
         {
-            String urlString = @"http://google.com";//new ShortUrl.Logic.UrlManager().GetUrl(key);
-            if (!String.IsNullOrWhiteSpace(urlString))
+            if (!string.IsNullOrEmpty(shortCode))
             {
-                return Redirect(urlString);
+                string urlString = await _urlDataManager.GetUrlAsync(shortCode);
+                if (!String.IsNullOrWhiteSpace(urlString))
+                {
+                    return Redirect(urlString);
+                }              
             }
-            return null;
+            return NotFound();
         }
 
-        [HttpPost]
-        public async Task<string> CreateUrl(string originalUrl)
+        [HttpPost("short")]
+        public async Task<string> CreateUrl([FromBody] UrlViewModel urlViewModel)
         {
-            if (await _urlValidationService.IsUrlValid(originalUrl))
+            if (urlViewModel != null && await _urlValidationService.IsUrlValid(urlViewModel.OriginalUrl))
             {
-                return $"this is short url for {originalUrl}";
+                var shortCode = await _urlDataManager.GenerateShortUrlCode(urlViewModel.OriginalUrl);
+                return $"{Request.Scheme}://{Request.Host}/{shortCode}";               
             }
             else
             {
