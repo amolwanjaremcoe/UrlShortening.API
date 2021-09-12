@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UrlShortening.Model;
+using UrlShortening.Service;
 
 namespace UrlShortening.API
 {
@@ -26,6 +28,8 @@ namespace UrlShortening.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddHttpClient();
+            services.AddTransient<IUrlValidationService, UrlValidationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
