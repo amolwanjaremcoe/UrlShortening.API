@@ -12,15 +12,17 @@ namespace UrlShortening.Service.Implementation
     {
         private readonly IUrlDataRepository _urlDataRepository;
         private readonly IShortCodeGeneratorService _shortCodeGeneratorService;
-        private readonly int _codeGenerationMaxAttempts = 5;
-        private readonly int _defaultExpirationYear = 5;
+        private readonly int _codeGenerationMaxAttempts;
+        private readonly int _defaultExpirationYear;
         private readonly ILogger _logger;        
 
-        public UrlDataManager(IUrlDataRepository urlDataRepository, IShortCodeGeneratorService shortCodeGeneratorService, ILogger logger)
+        public UrlDataManager(IUrlDataRepository urlDataRepository, IShortCodeGeneratorService shortCodeGeneratorService, ILogger logger, ServerConfig serverConfig)
         {
             _urlDataRepository = urlDataRepository;
             _shortCodeGeneratorService = shortCodeGeneratorService;
-            _logger = logger;            
+            _logger = logger;
+            _codeGenerationMaxAttempts = serverConfig.CodeGenerationMaxAttempts;
+            _defaultExpirationYear = serverConfig.ShortcodeExpirationYear;
         }
 
         public async Task<string> GetUrlAsync(string shortCode)

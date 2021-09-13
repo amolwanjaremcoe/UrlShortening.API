@@ -22,18 +22,24 @@ namespace UrlShortening.Unit.Test.Services
         [SetUp]
         public void SetUp()
         {
+            var serverConfig = new Model.ServerConfig { ShortcodeExpirationYear = 5, CodeGenerationMaxAttempts = 5 };
             _mockLogger = new Mock<ILogger>();
             _mockUrlDataRepository = new Mock<IUrlDataRepository>();
             _mockShortCodeGeneratorService = new Mock<IShortCodeGeneratorService>();
-            _urlDataManager = new UrlDataManager(_mockUrlDataRepository.Object, _mockShortCodeGeneratorService.Object, _mockLogger.Object);
+            _urlDataManager = new UrlDataManager(_mockUrlDataRepository.Object, _mockShortCodeGeneratorService.Object, _mockLogger.Object, serverConfig);
         }
 
         [Test]
         public async Task Original_Url_Should_be_Returned_For_Valid_Shortcode()
         {
             var googleUrl = "https://Google.com";
-            var stubUrlData = new Model.UrlData { ShortCode = "code", OriginalUrl = googleUrl, 
-                ExpirationDate = System.DateTime.Now.AddYears(5), CreationDate = System.DateTime.Now };
+            var stubUrlData = new Model.UrlData
+            {
+                ShortCode = "code",
+                OriginalUrl = googleUrl,
+                ExpirationDate = System.DateTime.Now.AddYears(5),
+                CreationDate = System.DateTime.Now
+            };
             _mockUrlDataRepository.Setup(r => r.GetUrlDataAsync(It.IsAny<string>())).ReturnsAsync(stubUrlData);
             var response = await _urlDataManager.GetUrlAsync(stubUrlData.ShortCode);
             Assert.IsNotEmpty(response);
@@ -54,7 +60,7 @@ namespace UrlShortening.Unit.Test.Services
             _mockUrlDataRepository.Setup(r => r.GetUrlDataAsync(It.IsAny<string>())).ReturnsAsync(stubUrlData);
             _mockUrlDataRepository.Setup(r => r.DeleteAsync(It.IsAny<string>())).ReturnsAsync(true);
             var response = await _urlDataManager.GetUrlAsync(stubUrlData.ShortCode);
-            Assert.IsEmpty(response);            
+            Assert.IsEmpty(response);
         }
     }
 }

@@ -41,8 +41,15 @@ namespace UrlShortening.API
             {
                 o.Configuration = Configuration.GetValue<string>("Redis:Configuration");
                 o.InstanceName = Configuration.GetValue<string>("Redis:InstanceName");
-            });           
+               
+            });
             services.AddSingleton(typeof(ILogger), logger);
+            services.AddSingleton(typeof(ServerConfig), new ServerConfig
+            {
+                CodeGenerationMaxAttempts = Configuration.GetValue<int>("CodeGenerationMaxAttempts"),
+                ShortcodeExpirationYear = Configuration.GetValue<int>("ShortcodeExpirationYear"),
+                CacheTimeoutHour = Configuration.GetValue<int>("CacheTimeoutHour"),
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,7 +65,13 @@ namespace UrlShortening.API
             app.UseRouting();
 
             app.UseAuthorization();
-
+            
+            //app.UseSwagger();
+            //app.UseSwaggerUI(c =>
+            //{
+            //    c.SwaggerEndpoint("/swagger/v1/swagger.json",
+            //    "URL Shortner API v1");
+            //});
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

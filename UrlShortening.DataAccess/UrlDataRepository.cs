@@ -14,11 +14,12 @@ namespace UrlShortening.DataAccess
     {
         private readonly IUrlDataContext _context;
         private readonly IDistributedCache _cache;
-
-        public UrlDataRepository(IUrlDataContext context, IDistributedCache cache)
+        private readonly int _cacheTimeoutHour;
+        public UrlDataRepository(IUrlDataContext context, IDistributedCache cache, ServerConfig serverConfig)
         {
             _context = context;
             _cache = cache;
+            _cacheTimeoutHour = serverConfig.CacheTimeoutHour;
         }
 
         // api/[GET]
@@ -75,7 +76,10 @@ namespace UrlShortening.DataAccess
                     //Save in the cache
                     var jsonString = JsonConvert.SerializeObject(urlData);
                     var byteData = Encoding.ASCII.GetBytes(jsonString);
-                    await _cache.SetAsync(urlData.ShortCode, byteData);
+                    await _cache.SetAsync(urlData.ShortCode, byteData, new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(_cacheTimeoutHour)
+                    });                 
                 }
                 return urlData;
             }
