@@ -24,7 +24,7 @@
 5. We are using the Redis cache to store the Redirection requests. It will cache the recent redirection requests in memory.
    Data will be returned from the Cache if found in the cache. We will set the cache expiration to 4 hours. 
    This value can be adjusted as per the request pattern.
-
+6. Added Swagger for API documentation and testing
 
 # How to Run the application - 
 1. Run the "docker compose up" command to install the required services (Mongo db, Redis) in the docker container.

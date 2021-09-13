@@ -50,6 +50,7 @@ namespace UrlShortening.API
                 ShortcodeExpirationYear = Configuration.GetValue<int>("ShortcodeExpirationYear"),
                 CacheTimeoutHour = Configuration.GetValue<int>("CacheTimeoutHour"),
             });
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,6 +59,13 @@ namespace UrlShortening.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json",
+                    "URL Shortner API v1");
+                });
             }
 
             app.UseHttpsRedirection();
@@ -66,12 +74,6 @@ namespace UrlShortening.API
 
             app.UseAuthorization();
             
-            //app.UseSwagger();
-            //app.UseSwaggerUI(c =>
-            //{
-            //    c.SwaggerEndpoint("/swagger/v1/swagger.json",
-            //    "URL Shortner API v1");
-            //});
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
