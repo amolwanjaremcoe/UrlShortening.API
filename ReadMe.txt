@@ -1,16 +1,16 @@
-##The scope/goals of the solution
+## The scope/goals of the solution
 1. For any given valid URL, service should create/generate a shorter and unique alias link. This link should be short. 
 2. Service will check if given original URL is valid and is reachable before creating keys and adding to database.
 3. When users access a short link, our service should redirect them to the original link.
 4. Links will expire after a standard default timespan (Five years).
 5. Service should Cache keys to the reduce database querying and improve the Redirection time.
 
-#Assumptions:
+# Assumptions:
 1. This application will be read heavy (i.e. more GET requests than the create/generate POST requests ) 
 2. We may need to store millions/billions of records in the database.
 3. For the same URL request, user will receive different Shortened URL everytime.
 
-#Implementation approach :
+# Implementation approach :
 
 1. We will build a rest API (present in the UrlShortening.API project) using .Net core API to expose the functionality of our application.
 2. We will expose two endpoints for users to consume - 
@@ -26,7 +26,7 @@
    This value can be adjusted as per the request pattern.
 
 
-#How to Run the application - 
+# How to Run the application - 
 1. Run the "docker compose up" command to install the required services (Mongo db, Redis) in the docker container.
 2. Set the "UrlShortening.API" project as the start up application and run the project in IIS Express.
 3. In order to Create the Short URL, send the POST request to localhost:44315 endpoint
@@ -51,7 +51,7 @@ Content-Type: application/json
 Cache-Control: no-cache
 /*****************************************Redirection Request sample**********************************/
 
-#Future scope :
+# Future scope :
 1. We can assign a Api-key to user requesting to generate shorter URL. This can be used to throttle users based on their allocated quota.
 2. We can support sending the custom user defined alias which can be used as key in the shorter URL.
 3. We can support user sending the Expiration date as part of create/generate request.
