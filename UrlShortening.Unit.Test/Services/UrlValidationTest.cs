@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UrlShortening.Service;
 using UrlShortening.Service.Implementation;
 
-namespace UrlShortening.Test
+namespace UrlShortening.Test.Services
 {
     [TestFixture]
     public class UrlValidationTest
