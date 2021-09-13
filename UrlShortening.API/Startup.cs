@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using UrlShortening.API.Filters;
 using UrlShortening.DataAccess;
 using UrlShortening.Model;
 using UrlShortening.Service;
@@ -23,8 +24,13 @@ namespace UrlShortening.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<MongoDBConfig>(Configuration.GetSection("MongoDBConfig").Get<MongoDBConfig>());
-            services.AddControllers();
+            var serviceProvider = services.BuildServiceProvider();
+            var logger = serviceProvider.GetService<ILogger<Startup>>();
+            services.AddSingleton(Configuration.GetSection("MongoDBConfig").Get<MongoDBConfig>());
+            services.AddControllers(options =>
+            {
+                options.Filters.Add(new CustomExceptionFilterAttribute(logger));
+            });
             services.AddHttpClient();
             services.AddTransient<IUrlValidationService, UrlValidationService>();
             services.AddTransient<IUrlDataRepository, UrlDataRepository>();
@@ -35,10 +41,7 @@ namespace UrlShortening.API
             {
                 o.Configuration = Configuration.GetValue<string>("Redis:Configuration");
                 o.InstanceName = Configuration.GetValue<string>("Redis:InstanceName");
-            });
-
-            var serviceProvider = services.BuildServiceProvider();
-            var logger = serviceProvider.GetService<ILogger<Startup>>();
+            });           
             services.AddSingleton(typeof(ILogger), logger);
         }
 
